@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NN WebView2</title>
+  <style>
+    *,
+    *::after,
+    *::before {
+      padding: 0;
+      margin: 0;
+      box-sizing: border-box;
+      scrollbar-width: none;
+    }
+
+    body {
+      position: relative;
+      display: flex;
+      overflow: hidden;
+      scroll-behavior: smooth;
+      font-size: 15px;
+      text-rendering: optimizeLegibility;
+      width: 100vw;
+      height: 100vh;
+      background-color: #fff6fb;
+    }
+
+    #cvs {
+      position: absolute;
+    }
+
+    main {
+      position: absolute;
+      display: block;
+      justify-items: center;
+      width: 100%;
+      height: 100%;
+      padding-top: 20vh;
+    }
+
+    h1,
+    h2,
+    p {
+      color: #fd90ba;
+    }
+
+    .title {
+      font-size: 50px;
+    }
+  </style>
+</head>
+
+<body>
+  <main>
+    <h1 class="title">Hello NN Webview2</h1>
+    <h1>Desktop web app repository</h1>
+  </main>
+  <canvas id="cvs"></canvas>
+  <script>
+    class Cube {
+      constructor(ctx) {
+        this.ctx = ctx;
+        this.rotationX = 0;
+        this.rotationY = 0;
+        this.rotationZ = 0;
+        this.animationFrameId = 0;
+        this.position = [0, 0];
+        this.styleCfg = {
+          color: "red",
+          fontSize: 0,
+          fontMonospace: 'Arial',
+          asciiChars: ["@", "$", "~", "#", ";", "+"]
+        };
+        this.rederCfg = {
+          length: 1,
+          step: 0.2,
+          cameraDistance: 100,
+          perspective: 100,
+          rotationSpeed: {
+            x: 0.005,
+            y: 0.005,
+            z: 0.001
+          }
+        };
+      }
+      get size() {
+        return this.rederCfg.length * this.styleCfg.fontSize;
+      }
+      calculateXYZ(i, j, k) {
+        const sx = Math.sin(this.rotationX);
+        const sy = Math.sin(this.rotationY);
+        const sz = Math.sin(this.rotationZ);
+        const cx = Math.cos(this.rotationX);
+        const cy = Math.cos(this.rotationY);
+        const cz = Math.cos(this.rotationZ);
+        return [
+          j * sx * sy * cz -
+          k * cx * sy * cz +
+          j * cx * sz +
+          k * sx * sz +
+          i * cy * cz,
+          j * cx * cz +
+          k * sx * cz -
+          j * sx * sy * sz +
+          k * cx * sy * sz -
+          i * cy * sz,
+          k * cx * cy - j * sx * cy + i * sy,
+        ];
+      }
+      draw() {
+        const { ctx, position, styleCfg, rederCfg } = this;
+        const { length, step, cameraDistance, perspective } = rederCfg;
+        for (let cubeY = -length; cubeY < length; cubeY += rederCfg.step)
+          for (let cubeX = -length; cubeX < length; cubeX += rederCfg.step)
+            [
+              { x: cubeX, y: cubeY, z: -length, char: styleCfg.asciiChars[0] },
+              { x: length, y: cubeY, z: cubeX, char: styleCfg.asciiChars[1] },
+              { x: -length, y: cubeY, z: -cubeX, char: styleCfg.asciiChars[2] },
+              { x: -cubeX, y: cubeY, z: length, char: styleCfg.asciiChars[3] },
+              { x: cubeX, y: -length, z: -cubeY, char: styleCfg.asciiChars[4] },
+              { x: cubeX, y: length, z: cubeY, char: styleCfg.asciiChars[5] }
+            ].forEach(surface => {
+              const [x, y, z] = this.calculateXYZ(surface.x, surface.y, surface.z);
+              const zoom = perspective * (1 / (z + cameraDistance));
+              ctx.fillText(
+                surface.char,
+                Math.floor(position[0] + zoom * x),
+                Math.floor(position[1] + zoom * y)
+              );
+            });
+      }
+      startAnimate() {
+        const { ctx } = this;
+        ctx.fillStyle = this.styleCfg.color;
+        ctx.font = `${this.styleCfg.fontSize}px ${this.styleCfg.fontMonospace}`;
+        const f = () => {
+          ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+          this.draw();
+          this.rotationX += this.rederCfg.rotationSpeed.x;
+          this.rotationY += this.rederCfg.rotationSpeed.y;
+          this.rotationZ += this.rederCfg.rotationSpeed.z;
+          this.animationFrameId = requestAnimationFrame(f);
+        };
+        f();
+      }
+      stopAnimate() {
+        cancelAnimationFrame(this.animationFrameId);
+      }
+    }
+    cvs.width = cvs.style.width = window.innerWidth * window.devicePixelRatio;
+    cvs.height = cvs.style.height = window.innerHeight * window.devicePixelRatio;
+    const cube = new Cube(cvs.getContext("2d"));
+    cube.styleCfg.fontSize = 32;
+    cube.styleCfg.color = "#fdb2cf";
+    cube.rederCfg.length = 3;
+    cube.rederCfg.step = 1.1;
+    cube.rederCfg.cameraDistance = 1;
+    cube.rederCfg.perspective = 100;
+    cube.position = [cvs.width / 2 - cube.size, cvs.height / 2 - cube.size];
+    cube.startAnimate();
+    let click = false;
+    window.addEventListener("click", () => {
+      if (click) {
+        cube.startAnimate();
+        click = false;
+      } else {
+        cube.stopAnimate();
+        click = true;
+      }
+    })
+  </script>
+</body>
+
+</html>
