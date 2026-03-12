@@ -8,6 +8,9 @@ has no dependencies, and is based on C++20.
 ./build/a
 ```
 
+## Note
+This uses WebView2's custom uri. For multi-file packaging, see the example folder and run its build script.
+
 ## Why develop
 It's 2026, and I'm fed up with apps built on the Electron framework.
 Especially now, during this period of rapid AI development, 99% of AI applications use the Electron framework!!!
@@ -21,8 +24,9 @@ It has no dependencies and can be compiled and run directly.
 Come on, what are you waiting for?
 
 ## Reference link
-[https://en.cppreference.com/w/]
-[https://github.com/microsoft/wil/tree/master]
-[https://learn.microsoft.com/en-us/cpp/text/how-to-convert-between-various-string-types?view=msvc-170/]
-[https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/]
-[https://www.iana.org/]
+- https://en.cppreference.com/w
+- https://github.com/microsoft/wil/tree/master
+- https://github.com/MicrosoftEdge/WebView2Samples
+- https://learn.microsoft.com/en-us/cpp/text/how-to-convert-between-various-string-types?view=msvc-170
+- https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32
+- https://www.iana.org
